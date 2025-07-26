@@ -6,7 +6,7 @@ const placesRoutes = require("./routes/places-routes");
 const app = express();
 
 app.use(bodyParser.json());
-app.use(placesRoutes);
+app.use("/api/places", placesRoutes);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
