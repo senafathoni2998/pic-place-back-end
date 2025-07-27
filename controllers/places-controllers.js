@@ -1,4 +1,5 @@
 const uuid = require("uuid");
+const HttpError = require("../models/http-error");
 
 const DUMMY_PLACES = [
   {
