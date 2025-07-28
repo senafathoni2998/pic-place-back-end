@@ -3,6 +3,20 @@ const { validationResult } = require("express-validator");
 const { getCoordsForAddress } = require("../util/location");
 const HttpError = require("../models/http-error");
 
+/**
+ * An array of place objects representing famous landmarks.
+ *
+ * @constant
+ * @type {Array<Object>}
+ * @property {string} id - Unique identifier for the place.
+ * @property {string} title - Name of the place.
+ * @property {string} description - Brief description of the place.
+ * @property {string} address - Physical address of the place.
+ * @property {Object} location - Geographic coordinates of the place.
+ * @property {number} location.lat - Latitude of the place.
+ * @property {number} location.lng - Longitude of the place.
+ * @property {string} creator - Identifier of the user who created the place entry.
+ */
 const DUMMY_PLACES = [
   {
     id: "p1",
