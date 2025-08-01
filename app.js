@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const HttpError = require("./models/http-error");
 const placesRoutes = require("./routes/places-routes");
 const usersRoutes = require("./routes/users-routes");
+const mongoose = require("mongoose");
 
 const app = express();
 
@@ -25,6 +26,15 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || "An unknown error occurred!" });
 });
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
-});
+mongoose
+  .connect(
+    "mongodb://sena:galacta2025@localhost:27017/pic_place?authSource=pic_place"
+  )
+  .then(() => {
+    app.listen(3000, () => {
+      console.log("Server is running on port 3000");
+    });
+  })
+  .catch((err) => {
+    console.error("Database connection failed:", err);
+  });
