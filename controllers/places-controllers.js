@@ -183,16 +183,15 @@ const updatePlace = async (req, res, next) => {
     .json({ message: "Place updated successfully!", place: updatedPlace });
 };
 
-const deletePlace = (req, res, next) => {
+const deletePlace = async (req, res, next) => {
   const placeId = req.params.pid;
-  const placeIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
-  if (placeIndex < 0) {
-    return next(
-      new HttpError("Could not find a place for the provided id.", 404)
-    );
+
+  try {
+    await Place.findByIdAndDelete(placeId);
+  } catch (err) {
+    return next(new HttpError("Deleting place failed, please try again.", 500));
   }
 
-  DUMMY_PLACES.splice(placeIndex, 1);
   res.status(200).json({ message: "Place deleted successfully!" });
 };
 
