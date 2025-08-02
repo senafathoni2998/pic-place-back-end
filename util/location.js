@@ -10,7 +10,7 @@ async function getCoordsForAddress(address) {
         limit: 1,
       },
       headers: {
-        "User-Agent": "pic-place-back-end/1.0 (your-email@example.com)",
+        "User-Agent": "pic-place-back-end/1.0 (aokiji2025@gmail.com)",
       },
     }
   );
