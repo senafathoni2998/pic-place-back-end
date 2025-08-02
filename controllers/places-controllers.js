@@ -20,41 +20,6 @@ const HttpError = require("../models/http-error");
  * @property {number} location.lng - Longitude of the place.
  * @property {string} creator - Identifier of the user who created the place entry.
  */
-const DUMMY_PLACES = [
-  {
-    id: "p1",
-    title: "Empire State Building",
-    description: "A famous skyscraper in New York City.",
-    address: "20 W 34th St, New York, NY 10001",
-    location: {
-      lat: 40.748817,
-      lng: -73.985428,
-    },
-    creator: "u1",
-  },
-  {
-    id: "p2",
-    title: "Eiffel Tower",
-    description: "An iconic landmark in Paris, France.",
-    address: "Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France",
-    location: {
-      lat: 48.858844,
-      lng: 2.294351,
-    },
-    creator: "u2",
-  },
-  // {
-  //     id: "p3",
-  //     title: "Colosseum",
-  //     description: "An ancient amphitheater in Rome, Italy.",
-  //     address: "Piazza del Colosseo, 1, 00184 Roma RM, Italy",
-  //     location: {
-  //     lat: 41.890251,
-  //     lng: 12.492373,
-  //     },
-  //     creator: "u1",
-  // },
-];
 
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid;
@@ -80,16 +45,16 @@ const getPlaceById = async (req, res, next) => {
 
 const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
-  let places;
+  let userWithPlaces;
   try {
-    places = await Place.find({ creator: userId });
+    userWithPlaces = await User.findById(userId).populate("places");
   } catch (err) {
     return next(
       new HttpError("Fetching places failed, please try again.", 500)
     );
   }
   // const places = DUMMY_PLACES.filter((p) => p.creator === userId);
-  if (!places || places.length === 0) {
+  if (!userWithPlaces || userWithPlaces.places.length === 0) {
     return next(
       new HttpError("Could not find places for the provided user id.", 404)
     );
@@ -97,7 +62,9 @@ const getPlacesByUserId = async (req, res, next) => {
 
   res.json({
     message: "Fetching places for user success!",
-    places: places.map((place) => place.toObject({ getters: true })),
+    places: userWithPlaces.places.map((place) =>
+      place.toObject({ getters: true })
+    ),
   });
 };
 
