@@ -78,7 +78,7 @@ const signup = async (req, res, next) => {
     .json({ message: "User created successfully!", user: userWithoutPassword });
 };
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return next(
@@ -86,9 +86,13 @@ const login = (req, res, next) => {
     );
   }
   const { email, password } = req.body;
-  const identifiedUser = USERS.find(
-    (u) => u.email === email && u.password === password
-  );
+
+  let identifiedUser;
+  try {
+    identifiedUser = await User.findOne({ email, password });
+  } catch (err) {
+    return next(new HttpError("Logging in failed, please try again.", 500));
+  }
 
   if (!identifiedUser) {
     return next(
@@ -96,7 +100,9 @@ const login = (req, res, next) => {
     );
   }
 
-  const { password: _, ...userWithoutPassword } = identifiedUser;
+  const { password: _, ...userWithoutPassword } = identifiedUser.toObject({
+    getters: true,
+  });
 
   res
     .status(200)
