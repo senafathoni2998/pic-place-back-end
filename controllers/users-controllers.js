@@ -1,25 +1,38 @@
 const HttpError = require("../models/http-error");
 const uuid = require("uuid");
+const User = require("../models/user");
 const { validationResult } = require("express-validator");
 
-const USERS = [
-  {
-    id: "u1",
-    name: "Max Schwarz",
-    email: "max.schwarz@example.com",
-    password: "max123",
-    image:
-      "https://images.pexels.com/photos/839011/pexels-photo-839011.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-    places: 3,
-  },
-];
+// const USERS = [
+//   {
+//     id: "u1",
+//     name: "Max Schwarz",
+//     email: "max.schwarz@example.com",
+//     password: "max123",
+//     image:
+//       "https://images.pexels.com/photos/839011/pexels-photo-839011.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
+//     places: 3,
+//   },
+// ];
 
-const getUsers = (req, res, next) => {
-  const filteredUsers = USERS.map(({ password, ...user }) => user);
-  res.status(200).json({ users: filteredUsers });
+const getUsers = async (req, res, next) => {
+  let users;
+  try {
+    users = await User.find({}, "-password");
+  } catch (err) {
+    return next(
+      new HttpError("Fetching users failed, please try again later.", 500)
+    );
+  }
+  if (!users) {
+    return next(new HttpError("No users found.", 404));
+  }
+  res
+    .status(200)
+    .json({ users: users.map((user) => user.toObject({ getters: true })) });
 };
 
-const signup = (req, res, next) => {
+const signup = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return next(
@@ -27,24 +40,38 @@ const signup = (req, res, next) => {
     );
   }
   const { name, email, password } = req.body;
-  const hasUser = USERS.find((u) => u.email === email);
-  if (hasUser) {
+
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email });
+  } catch (err) {
+    return next(new HttpError("Signing up failed, please try again.", 500));
+  }
+
+  if (existingUser) {
     return next(
       new HttpError("User exists already, please login instead.", 422)
     );
   }
-  const newUser = {
-    id: uuid.v4(),
+
+  let newUser = new User({
     name,
     email,
     password,
     image:
       "https://images.pexels.com/photos/839011/pexels-photo-839011.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-    places: 0,
-  };
-  USERS.push(newUser);
+    places: [],
+  });
 
-  const { password: _, ...userWithoutPassword } = newUser;
+  try {
+    await newUser.save();
+  } catch (err) {
+    return next(new HttpError("Signing up failed, please try again.", 500));
+  }
+
+  const { password: _, ...userWithoutPassword } = newUser.toObject({
+    getters: true,
+  });
 
   res
     .status(201)
