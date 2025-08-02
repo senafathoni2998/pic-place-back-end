@@ -94,7 +94,7 @@ const login = async (req, res, next) => {
     return next(new HttpError("Logging in failed, please try again.", 500));
   }
 
-  if (!identifiedUser) {
+  if (!identifiedUser || identifiedUser.password !== password) {
     return next(
       new HttpError("Invalid credentials, could not log you in.", 401)
     );
