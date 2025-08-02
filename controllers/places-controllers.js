@@ -123,15 +123,6 @@ const createPlace = async (req, res, next) => {
     );
   }
 
-  // const newPlace = {
-  //   id: uuid.v4(),
-  //   title,
-  //   description,
-  //   location,
-  //   address,
-  //   creator,
-  // };
-
   const newPlace = new Place({
     title,
     description,
@@ -151,31 +142,42 @@ const createPlace = async (req, res, next) => {
   }
 };
 
-const updatePlace = (req, res, next) => {
+const updatePlace = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return next(
       new HttpError("Invalid inputs passed, please check your data.", 422)
     );
   }
+
   const placeId = req.params.pid;
-  const { title, description, location, address } = req.body;
-  const placeIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
-  if (placeIndex < 0) {
+  const { title, description } = req.body;
+  // const placeIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
+  let place;
+  try {
+    place = await Place.findById(placeId);
+  } catch (err) {
+    return next(new HttpError("Fetching place failed, please try again.", 500));
+  }
+
+  if (!place) {
     return next(
       new HttpError("Could not find a place for the provided id.", 404)
     );
   }
 
   const updatedPlace = {
-    ...DUMMY_PLACES[placeIndex],
+    ...place.toObject({ getters: true }),
     title,
     description,
-    location,
-    address,
   };
 
-  DUMMY_PLACES[placeIndex] = updatedPlace;
+  try {
+    await place.updateOne(updatedPlace);
+  } catch (err) {
+    return next(new HttpError("Updating place failed, please try again.", 500));
+  }
+
   res
     .status(200)
     .json({ message: "Place updated successfully!", place: updatedPlace });
