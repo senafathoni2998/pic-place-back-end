@@ -1,6 +1,7 @@
 const uuid = require("uuid");
 const { validationResult } = require("express-validator");
 const { getCoordsForAddress } = require("../util/location");
+const Place = require("../models/place");
 const HttpError = require("../models/http-error");
 
 /**
@@ -53,9 +54,10 @@ const DUMMY_PLACES = [
   // },
 ];
 
-const getPlaceById = (req, res, next) => {
+const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid;
-  const place = DUMMY_PLACES.find((p) => p.id === placeId);
+  const place = await Place.findById(placeId);
+  // const place = DUMMY_PLACES.find((p) => p.id === placeId);
   if (!place) {
     throw new HttpError("Could not find a place for the provided id.", 404);
   }
@@ -63,9 +65,10 @@ const getPlaceById = (req, res, next) => {
   res.json({ message: "Fetching place success!", place });
 };
 
-const getPlacesByUserId = (req, res, next) => {
+const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
-  const places = DUMMY_PLACES.filter((p) => p.creator === userId);
+  const places = await Place.find({ creator: userId });
+  // const places = DUMMY_PLACES.filter((p) => p.creator === userId);
   if (!places || places.length === 0) {
     return next(
       new HttpError("Could not find places for the provided user id.", 404)
@@ -99,18 +102,32 @@ const createPlace = async (req, res, next) => {
     );
   }
 
-  const newPlace = {
-    id: uuid.v4(),
+  // const newPlace = {
+  //   id: uuid.v4(),
+  //   title,
+  //   description,
+  //   location,
+  //   address,
+  //   creator,
+  // };
+
+  const newPlace = new Place({
     title,
     description,
     location,
     address,
     creator,
-  };
-  DUMMY_PLACES.push(newPlace);
-  res
-    .status(201)
-    .json({ message: "Place created successfully!", place: newPlace });
+  });
+
+  // DUMMY_PLACES.push(newPlace);
+  try {
+    await newPlace.save();
+    res
+      .status(201)
+      .json({ message: "Place created successfully!", place: newPlace });
+  } catch (err) {
+    return next(new HttpError("Creating place failed, please try again.", 500));
+  }
 };
 
 const updatePlace = (req, res, next) => {
