@@ -11,11 +11,7 @@ router.get("/user/:uid", placesControllers.getPlacesByUserId);
 
 router.patch(
   "/:pid",
-  [
-    check("title").not().isEmpty(),
-    check("description").isLength({ min: 5 }),
-    check("address").not().isEmpty(),
-  ],
+  [check("title").not().isEmpty(), check("description").isLength({ min: 5 })],
   placesControllers.updatePlace
 );
 
