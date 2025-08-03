@@ -99,6 +99,8 @@ const createPlace = async (req, res, next) => {
     location,
     address,
     creator,
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Empire_State_Building_%28cropped%29.jpg/800px-Empire_State_Building_%28cropped%29.jpg",
   });
 
   let user;
