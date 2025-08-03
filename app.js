@@ -5,6 +5,8 @@ const placesRoutes = require("./routes/places-routes");
 const usersRoutes = require("./routes/users-routes");
 const mongoose = require("mongoose");
 
+require("dotenv").config();
+
 const app = express();
 
 app.use(bodyParser.json());
@@ -27,11 +29,9 @@ app.use((error, req, res, next) => {
 });
 
 mongoose
-  .connect(
-    "mongodb://sena:galacta2025@localhost:27017/pic_place?authSource=pic_place"
-  )
+  .connect(process.env.MONGODB_URI)
   .then(() => {
-    app.listen(3000, () => {
+    app.listen(5000, () => {
       console.log("Server is running on port 3000");
     });
   })
