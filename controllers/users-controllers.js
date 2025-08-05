@@ -73,32 +73,45 @@ const signup = async (req, res, next) => {
     .json({ message: "User created successfully!", user: userWithoutPassword });
 };
 
+/**
+ * Authenticates a user by verifying their email and password.
+ * Responds with user data (excluding password) if credentials are valid.
+ */
 const login = async (req, res, next) => {
+  //* Validate request body using express-validator
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    // If validation fails, forward a 422 error to the error handler
     return next(
       new HttpError("Invalid inputs passed, please check your data.", 422)
     );
   }
+
+  //* Extract email and password from the request body
   const { email, password } = req.body;
 
   let identifiedUser;
   try {
+    //* Find user by email in the database
     identifiedUser = await User.findOne({ email, password });
   } catch (err) {
+    //* If a database error occurs, forward a 500 error
     return next(new HttpError("Logging in failed, please try again.", 500));
   }
 
+  //* If user is not found or password does not match, forward a 401 error
   if (!identifiedUser || identifiedUser.password !== password) {
     return next(
       new HttpError("Invalid credentials, could not log you in.", 401)
     );
   }
 
+  //* Exclude password from the user object before sending the response
   const { password: _, ...userWithoutPassword } = identifiedUser.toObject({
     getters: true,
   });
 
+  //* Respond with success message and user data (without password)
   res
     .status(200)
     .json({ message: "Logged in successfully!", user: userWithoutPassword });
