@@ -2,18 +2,26 @@ const HttpError = require("../models/http-error");
 const User = require("../models/user");
 const { validationResult } = require("express-validator");
 
+/**
+ * Fetches all users from the database, excluding their passwords.
+ * Responds with a list of users or an error if fetching fails.
+ */
 const getUsers = async (req, res, next) => {
-  let users;
+  let users; // Will hold the list of users fetched from the database
   try {
+    //* Find all users, exclude the 'password' field from the result
     users = await User.find({}, "-password");
   } catch (err) {
+    //* If an error occurs during database operation, forward an error to the error handler
     return next(
       new HttpError("Fetching users failed, please try again later.", 500)
     );
   }
   if (!users) {
+    //* If no users are found, forward a 404 error
     return next(new HttpError("No users found.", 404));
   }
+  //* Respond with the list of users, converting each to a plain JS object with getters applied
   res
     .status(200)
     .json({ users: users.map((user) => user.toObject({ getters: true })) });
