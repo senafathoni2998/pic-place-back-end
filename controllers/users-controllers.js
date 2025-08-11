@@ -115,10 +115,13 @@ const login = async (req, res, next) => {
     );
   }
 
+  // Compare the provided password with the hashed password stored in the database
   let isValidPassword = false;
   try {
+    // bcrypt.compare returns true if the password matches, false otherwise
     isValidPassword = await bcrypt.compare(password, identifiedUser.password);
   } catch (err) {
+    // If an error occurs during password comparison, forward a 500 error
     const error = new HttpError(
       "Could not log you in, please check your credentials and try again",
       500
@@ -126,6 +129,7 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
+  // If password does not match, forward a 401 error (unauthorized)
   if (!isValidPassword) {
     return next(
       new HttpError("Invalid credentials, could not log you in.", 401)
