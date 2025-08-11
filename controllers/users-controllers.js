@@ -109,7 +109,24 @@ const login = async (req, res, next) => {
   }
 
   //* If user is not found or password does not match, forward a 401 error
-  if (!identifiedUser || identifiedUser.password !== password) {
+  if (!identifiedUser) {
+    return next(
+      new HttpError("Invalid credentials, could not log you in.", 401)
+    );
+  }
+
+  let isValidPassword = false;
+  try {
+    isValidPassword = await bcrypt.compare(password, identifiedUser.password);
+  } catch (err) {
+    const error = new HttpError(
+      "Could not log you in, please check your credentials and try again",
+      500
+    );
+    return next(error);
+  }
+
+  if (!isValidPassword) {
     return next(
       new HttpError("Invalid credentials, could not log you in.", 401)
     );
