@@ -1,6 +1,7 @@
 const HttpError = require("../models/http-error");
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 
 /**
@@ -73,13 +74,26 @@ const signup = async (req, res, next) => {
     return next(new HttpError("Signing up failed, please try again.", 500));
   }
 
+  let token;
+  try {
+    token = jwt.sign(
+      { id: newUser.id, email: newUser.email, name: newUser.email },
+      "secret_key_for_auth",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    return next(new HttpError("Signing up failed, please try again.", 500));
+  }
+
   const { password: _, ...userWithoutPassword } = newUser.toObject({
     getters: true,
   });
 
+  const userData = { ...userWithoutPassword, token };
+
   res
     .status(201)
-    .json({ message: "User created successfully!", user: userWithoutPassword });
+    .json({ message: "User created successfully!", user: userData });
 };
 
 /**
@@ -136,15 +150,31 @@ const login = async (req, res, next) => {
     );
   }
 
+  let token;
+  try {
+    token = jwt.sign(
+      {
+        id: identifiedUser.id,
+        email: identifiedUser.email,
+        name: identifiedUser.name,
+      },
+      "secret_key_for_auth",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    const error = new HttpError("Could not log you in, please try again", 500);
+    return next(error);
+  }
+
   //* Exclude password from the user object before sending the response
   const { password: _, ...userWithoutPassword } = identifiedUser.toObject({
     getters: true,
   });
 
+  const userData = { ...userWithoutPassword, token };
+
   //* Respond with success message and user data (without password)
-  res
-    .status(200)
-    .json({ message: "Logged in successfully!", user: userWithoutPassword });
+  res.status(200).json({ message: "Logged in successfully!", user: userData });
 };
 
 exports.getUsers = getUsers;
