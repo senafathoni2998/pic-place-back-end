@@ -190,7 +190,8 @@ const deletePlace = async (req, res, next) => {
     );
   }
 
-  const imagePath = place.image;
+  console.log("PLACE", place);
+  const imagePath = place.imageUrl;
 
   try {
     const sess = await mongoose.startSession();
@@ -204,6 +205,7 @@ const deletePlace = async (req, res, next) => {
     return next(new HttpError("Deleting place failed, please try again.", 500));
   }
 
+  console.log("IMAGE", imagePath);
   fs.unlink(imagePath, (err) => console.log(err));
 
   res.status(200).json({ message: "Place deleted successfully!" });
