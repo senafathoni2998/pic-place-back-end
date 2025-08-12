@@ -42,7 +42,7 @@ app.use((error, req, res, next) => {
   if (res.headerSent) {
     return next(error);
   }
-  console.log(error.code);
+  console.log("ERROR CODE", error);
   res.status(error.code || 500);
   res.json({ message: error.message || "An unknown error occurred!" });
 });
