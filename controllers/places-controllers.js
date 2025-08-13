@@ -194,7 +194,10 @@ const deletePlace = async (req, res, next) => {
     );
   }
 
-  console.log("PLACE", place);
+  if (place.creator.id !== req.userData.userId) {
+    return next(new HttpError("You're not allowed to edit this place.", 401));
+  }
+
   const imagePath = place.imageUrl;
 
   try {
