@@ -116,7 +116,7 @@ const login = async (req, res, next) => {
   let identifiedUser;
   try {
     //* Find user by email in the database
-    identifiedUser = await User.findOne({ email, password });
+    identifiedUser = await User.findOne({ email });
   } catch (err) {
     //* If a database error occurs, forward a 500 error
     return next(new HttpError("Logging in failed, please try again.", 500));
