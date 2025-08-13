@@ -143,7 +143,7 @@ const updatePlace = async (req, res, next) => {
 
   const placeId = req.params.pid;
   const { title, description } = req.body;
-  // const placeIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
+
   let place;
   try {
     place = await Place.findById(placeId);
@@ -155,6 +155,10 @@ const updatePlace = async (req, res, next) => {
     return next(
       new HttpError("Could not find a place for the provided id.", 404)
     );
+  }
+
+  if (place.creator.toString() !== req.userData.userId) {
+    return next(new HttpError("You're not allowed to edit this place.", 401));
   }
 
   const updatedPlace = {
