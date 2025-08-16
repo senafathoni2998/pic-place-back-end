@@ -1,0 +1,11 @@
+{
+  "env": {
+    "DB_NAME": "pic_place",
+    "DB_USER": "sena",
+    "DB_PASSWORD": "galacta2025",
+    "DB_HOST": "localhost",
+    "DB_PORT": "27017",
+    "DB_AUTH_SOURCE": "pic_place",
+    "SECRET_KEY": "secret_key_for_auth"
+  }
+}
