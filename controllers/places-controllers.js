@@ -77,7 +77,7 @@ const createPlace = async (req, res, next) => {
     );
   }
 
-  const { title, description, address, creator } = req.body;
+  const { title, description, address } = req.body;
 
   let location;
 
@@ -99,13 +99,13 @@ const createPlace = async (req, res, next) => {
     description,
     location,
     address,
-    creator,
+    creator: req.userData.userId,
     imageUrl: req.file.path,
   });
 
   let user;
   try {
-    user = await User.findById(creator);
+    user = await User.findById(req.userData.userId);
   } catch (err) {
     return next(new HttpError("Failed to find user.", 500));
   }
