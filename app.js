@@ -48,7 +48,10 @@ app.use((error, req, res, next) => {
 });
 
 mongoose
-  .connect(process.env.MONGODB_URI)
+  // .connect(process.env.MONGODB_URI)
+  .connect(
+    `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}?authSource=${process.env.DB_AUTH_SOURCE}`
+  )
   .then(() => {
     app.listen(5000, () => {
       console.log("Server is running on port 5000");
