@@ -15,7 +15,10 @@ const app = express();
 app.use(bodyParser.json());
 
 app.use("/uploads/images", express.static(path.join("uploads", "images")));
+//* if you want to deploy React + NodeJS in the same server
+// app.use(express.static(path.join("public")));
 
+// comment this app.use if you want to deploy React + NodeJS in the same server
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
