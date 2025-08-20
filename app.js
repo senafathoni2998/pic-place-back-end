@@ -33,6 +33,12 @@ app.use("/api/places", placesRoutes);
 
 app.use("/api/users", usersRoutes);
 
+//* if you want to deploy React + NodeJS in the same server
+// app.use((req, res, next) => {
+//   res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
+// })
+
+//* comment this if you want to deploy React + NodeJS in the same server
 app.use((req, res, next) => {
   const error = new HttpError("Could not find this route.", 404);
   throw error;
